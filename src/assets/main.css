@@ -1,0 +1,44 @@
+/* Stili globali dell'applicazione */
+
+:root {
+  --primary-color: #4361ee;
+  --secondary-color: #3f37c9;
+  --text-color: #333;
+  --light-bg: #f8f9fa;
+  --border-radius: 10px;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* Personalizzazioni Bootstrap */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}

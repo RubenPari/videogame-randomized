@@ -1,8 +1,12 @@
 <template>
-  <div class="container">
-    <h1 class="text-center my-4">Generatore Casuale di Videogiochi</h1>
+  <!-- Main application container with maximum width and horizontal padding -->
+  <div class="max-w-4xl mx-auto px-5">
+    <!-- Main application title -->
+    <h1 class="text-center text-3xl font-bold my-4">Random Video Game Generator</h1>
 
-    <!-- Sezione filtri -->
+    <!-- Filter section for game search -->
+    <!-- Passes genres, platforms and filters to child component -->
+    <!-- Listens to @generate event to generate a new random game -->
     <FilterSection
       :genres="genres"
       :platforms="platforms"
@@ -11,198 +15,254 @@
       @generate="generateRandomGame"
     />
 
-    <!-- Card del gioco -->
+    <!-- Currently selected game card -->
+    <!-- Shows only if there's a current game to display -->
     <GameCard v-if="currentGame" :game="currentGame" :description="gameDescription" />
 
-    <!-- Stato vuoto o caricamento -->
+    <!-- Loading state with animated spinner -->
+    <!-- Shows during data loading from API -->
     <div v-else-if="isLoading" class="text-center">
-      <div class="spinner-border loading-spinner" role="status">
-        <span class="visually-hidden">Caricamento...</span>
+      <div class="loading-spinner" role="status">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <span class="sr-only">Loading...</span>
       </div>
     </div>
 
+    <!-- Empty state when no game has been generated yet -->
     <div v-else class="empty-state">
-      <p>Nessun gioco generato. Premi il pulsante "Genera" per iniziare!</p>
+      <p class="text-gray-500">No game generated. Press the "Generate" button to start!</p>
     </div>
 
-    <!-- Cronologia giochi visualizzati -->
+    <!-- History of previously displayed games -->
+    <!-- Shows all games already seen by the user -->
     <GameHistory :gameHistory="gameHistory" />
 
-    <!-- Messaggi di errore -->
-    <div v-if="error" class="alert alert-danger mt-3">
+    <!-- Error messages with red styling -->
+    <!-- Displays any errors during loading or generation -->
+    <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-3">
       {{ error }}
     </div>
   </div>
 </template>
 
 <script>
+// Import of Vue components necessary for the interface
 import FilterSection from './components/FilterSection.vue'
 import GameCard from './components/GameCard.vue'
 import GameHistory from './components/GameHistory.vue'
+// API service to communicate with RAWG API
 import apiService from './services/api'
 
+/**
+ * Main component of the Random Video Game Generator application
+ * Manages the global state of the app and coordinates child components
+ */
 export default {
   name: 'App',
 
+  // Registration of child components used in the template
   components: {
     FilterSection,
     GameCard,
     GameHistory,
   },
 
+  /**
+   * Component reactive data
+   * Contains filters, game data, history and application state
+   */
   data() {
     return {
-      // Filtri
+      // Object containing all search filters
       filters: {
-        genre: '',
-        platforms: [],
-        minRating: 0,
-        startYear: 2010,
-        endYear: new Date().getFullYear(),
-        ordering: '-rating',
+        genre: '',                             // Selected genre (empty = all)
+        platforms: [],                          // Array of selected platform IDs
+        minRating: 0,                           // Minimum rating (0-5)
+        startYear: 2010,                        // Start year for search
+        endYear: new Date().getFullYear(),      // End year (default: current year)
+        ordering: '-rating',                    // Results ordering (default: by descending rating)
       },
 
-      // Dati
-      genres: [],
-      platforms: [],
-      currentGame: null,
-      gameDescription: '',
-      gameHistory: [],
-      totalGames: 0,
+      // Data loaded from API
+      genres: [],                               // List of all available genres
+      platforms: [],                           // List of all available platforms
+      currentGame: null,                        // Currently displayed game
+      gameDescription: '',                     // Translated description of current game
+      gameHistory: [],                          // History of already displayed games
+      totalGames: 0,                           // Total number of games found with current filters
 
-      // Stato
-      isLoading: false,
-      error: null,
+      // Application state
+      isLoading: false,                        // Flag to indicate loading in progress
+      error: null,                             // Error message to display
     }
   },
 
+  /**
+   * Vue lifecycle hook - called after component creation
+   * Loads necessary initial data (genres and platforms)
+   */
   created() {
     this.fetchGenres()
     this.fetchPlatforms()
   },
 
   methods: {
-    // Fetch dei generi
+    /**
+     * Retrieves the list of all available genres from RAWG API
+     * Populates the genres array for the FilterSection component
+     */
     async fetchGenres() {
       try {
         const response = await apiService.getGenres()
         this.genres = response.data.results
       } catch (error) {
-        console.error('Errore nel caricamento dei generi:', error)
-        this.error = 'Impossibile caricare i generi. Riprova più tardi.'
+        console.error('Error loading genres:', error)
+        this.error = 'Unable to load genres. Please try again later.'
       }
     },
 
-    // Fetch delle piattaforme
+    /**
+     * Retrieves the list of all available platforms from RAWG API
+     * Populates the platforms array for the FilterSection component
+     */
     async fetchPlatforms() {
       try {
         const response = await apiService.getPlatforms()
         this.platforms = response.data.results
       } catch (error) {
-        console.error('Errore nel caricamento delle piattaforme:', error)
-        this.error = 'Impossibile caricare le piattaforme. Riprova più tardi.'
+        console.error('Error loading platforms:', error)
+        this.error = 'Unable to load platforms. Please try again later.'
       }
     },
 
-    // Genera un gioco casuale
+    /**
+     * Generates a random game based on selected filters
+     * @param {Object} updatedFilters - Updated filters from FilterSection component
+     *
+     * Process:
+     * 1. Builds query parameters based on filters
+     * 2. Retrieves games from API
+     * 3. Filters already seen games
+     * 4. Randomly selects a game
+     * 5. Retrieves details and translates description
+     */
     async generateRandomGame(updatedFilters) {
       this.isLoading = true
       this.error = null
 
-      // Aggiorna i filtri se sono stati passati
+      // Updates filters if provided by child component
       if (updatedFilters) {
         this.filters = { ...updatedFilters }
       }
 
       try {
-        // Costruisci i parametri di query in base ai filtri
+        // Builds query parameters for RAWG API
         const params = {
-          ordering: this.filters.ordering,
-          page_size: 40,
-          metacritic:
+          ordering: this.filters.ordering,      // Sorting criteria
+          page_size: 40,                        // Number of results per page
+          metacritic:                           // Filter for Metacritic score
             this.filters.minRating > 0
-              ? `${Math.floor(this.filters.minRating * 20)},100`
+              ? `${Math.floor(this.filters.minRating * 20)},100`  // Converts rating 0-5 to 0-100
               : undefined,
         }
 
-        // Aggiungi filtri opzionali se specificati
+        // Adds optional filters only if specified
         if (this.filters.genre) params.genres = this.filters.genre
         if (this.filters.platforms && this.filters.platforms.length > 0) {
-          params.platforms = this.filters.platforms.join(',')
+          params.platforms = this.filters.platforms.join(',')  // Joins platform IDs
         }
 
-        // Gestisci intervallo di date
+        // Handles date range to filter games by release year
         if (this.filters.startYear || this.filters.endYear) {
+          // Start date (default: 1980-01-01)
           const startDate = this.filters.startYear
             ? `${this.filters.startYear}-01-01`
             : '1980-01-01'
+          // End date (default: end of current year)
           const endDate = this.filters.endYear
             ? `${this.filters.endYear}-12-31`
             : `${new Date().getFullYear()}-12-31`
           params.dates = `${startDate},${endDate}`
         }
 
-        // Fai la richiesta API
+        // Makes request to RAWG API to retrieve games
         const response = await apiService.getGames(params)
 
-        // Verifica se ci sono risultati
+        // Checks if results are available
         if (!response.data.results || response.data.results.length === 0) {
-          this.error = 'Nessun gioco trovato con questi filtri. Prova a modificarli.'
+          this.error = 'No games found with these filters. Try modifying them.'
           this.isLoading = false
           return
         }
 
+        // Saves total number of games found
         this.totalGames = response.data.count
 
-        // Filtra i giochi che hanno un voto minimo e che non sono già stati visualizzati
+        // Filters games by:
+        // 1. Specified minimum rating
+        // 2. Games not yet displayed (not present in history)
         let filteredGames = response.data.results.filter(
           (game) =>
             game.rating >= this.filters.minRating &&
             !this.gameHistory.some((historyGame) => historyGame.id === game.id),
         )
 
-        // Se non ci sono giochi disponibili dopo il filtro, utilizza tutti i risultati
+        // If all games have already been seen, show an error message
         if (filteredGames.length === 0) {
-          this.error = 'Hai già visto tutti i giochi con questi filtri. Prova a modificarli.'
+          this.error = 'You have already seen all games with these filters. Try modifying them.'
           this.isLoading = false
           return
         }
 
-        // Seleziona un gioco casuale tra quelli filtrati
+        // Selects a random game from filtered array
         const randomIndex = Math.floor(Math.random() * filteredGames.length)
         const selectedGame = filteredGames[randomIndex]
 
-        // Aggiungi alla cronologia
+        // Adds selected game to history
+        // Keeps track of all games already displayed
         this.gameHistory.push({
           id: selectedGame.id,
           name: selectedGame.name,
         })
 
-        // Ottieni dettagli del gioco
+        // Retrieves complete game details and translates description
         await this.fetchGameDetails(selectedGame.id)
 
-        // Imposta il gioco corrente
+        // Sets current game for display
         this.currentGame = selectedGame
       } catch (error) {
-        console.error('Errore nella generazione del gioco:', error)
-        this.error = 'Si è verificato un errore durante la generazione. Riprova più tardi.'
+        console.error('Error generating game:', error)
+        this.error = 'An error occurred during generation. Please try again later.'
       } finally {
         this.isLoading = false
       }
     },
 
-    // Ottieni dettagli del gioco e traduci la descrizione
+    /**
+     * Retrieves complete details of a specific game and translates description
+     * @param {number} gameId - ID of the game to retrieve
+     *
+     * Process:
+     * 1. Shows a loading message
+     * 2. Retrieves game details from API
+     * 3. Translates description from English to Italian using LibreTranslate
+     * 4. Handles any errors by showing a fallback message
+     */
     async fetchGameDetails(gameId) {
       try {
-        this.gameDescription = 'Caricamento descrizione...'
+        // Shows temporary message during loading
+        this.gameDescription = 'Loading description...'
+
+        // Retrieves complete game details
         const response = await apiService.getGameDetails(gameId)
         const englishDescription = response.data.description_raw
 
-        // Traduci la descrizione con LibreTranslate
+        // Translates description to Italian using LibreTranslate service
         this.gameDescription = await apiService.translateGameDescription(englishDescription)
       } catch (error) {
-        console.error('Errore nel caricamento dei dettagli del gioco:', error)
-        this.gameDescription = 'Descrizione non disponibile.'
+        console.error('Error loading game details:', error)
+        // Fallback message if description is not available
+        this.gameDescription = 'Description not available.'
       }
     },
   },
@@ -210,25 +270,14 @@ export default {
 </script>
 
 <style>
-body {
-  background-color: #f5f5f5;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.container {
-  max-width: 900px;
-  padding: 20px;
-}
-
+/* Styles for loading spinner */
 .loading-spinner {
-  margin: 30px auto;
-  width: 50px;
-  height: 50px;
+  margin: 30px auto;  /* Centers spinner with vertical margins */
 }
 
+/* Styles for empty state when no game has been generated */
 .empty-state {
-  text-align: center;
-  padding: 40px 0;
-  color: #6c757d;
+  text-align: center;  /* Centers text */
+  padding: 40px 0;     /* Vertical padding for spacing */
 }
 </style>

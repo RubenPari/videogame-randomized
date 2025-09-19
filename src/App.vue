@@ -1,46 +1,101 @@
 <template>
-  <!-- Main application container with maximum width and horizontal padding -->
-  <div class="max-w-4xl mx-auto px-5">
-    <!-- Main application title -->
-    <h1 class="text-center text-3xl font-bold my-4">Random Video Game Generator</h1>
+  <!-- Modern full-screen app with gradient background -->
+  <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-4 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+      <div class="absolute -bottom-8 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
 
-    <!-- Filter section for game search -->
-    <!-- Passes genres, platforms and filters to child component -->
-    <!-- Listens to @generate event to generate a new random game -->
-    <FilterSection
-      :genres="genres"
-      :platforms="platforms"
-      :filters="filters"
-      :isLoading="isLoading"
-      @generate="generateRandomGame"
-    />
-
-    <!-- Currently selected game card -->
-    <!-- Shows only if there's a current game to display -->
-    <GameCard v-if="currentGame" :game="currentGame" :description="gameDescription" />
-
-    <!-- Loading state with animated spinner -->
-    <!-- Shows during data loading from API -->
-    <div v-else-if="isLoading" class="text-center">
-      <div class="loading-spinner" role="status">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <span class="sr-only">Loading...</span>
+    <!-- Main content container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Hero section with improved typography -->
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center p-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
+          <div class="bg-gradient-to-r from-purple-400 to-blue-400 p-3 rounded-full">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent leading-tight">
+          Random Video Game Generator
+        </h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto">
+          Discover your next gaming adventure with our intelligent recommendation system
+        </p>
       </div>
-    </div>
 
-    <!-- Empty state when no game has been generated yet -->
-    <div v-else class="empty-state">
-      <p class="text-gray-500">No game generated. Press the "Generate" button to start!</p>
-    </div>
+      <!-- Filter section with glassmorphism design -->
+      <FilterSection
+        :genres="genres"
+        :platforms="platforms"
+        :filters="filters"
+        :isLoading="isLoading"
+        @generate="generateRandomGame"
+        class="mb-8"
+      />
 
-    <!-- History of previously displayed games -->
-    <!-- Shows all games already seen by the user -->
-    <GameHistory :gameHistory="gameHistory" />
+      <!-- Game result section -->
+      <div class="space-y-8">
+        <!-- Currently selected game card -->
+        <GameCard
+          v-if="currentGame"
+          :game="currentGame"
+          :description="gameDescription"
+          class="animate-fade-in-up"
+        />
 
-    <!-- Error messages with red styling -->
-    <!-- Displays any errors during loading or generation -->
-    <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-3">
-      {{ error }}
+        <!-- Enhanced loading state -->
+        <div v-else-if="isLoading" class="text-center py-16">
+          <div class="relative">
+            <!-- Outer spinning ring -->
+            <div class="w-20 h-20 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <!-- Inner pulsing dot -->
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-400 rounded-full animate-pulse"></div>
+          </div>
+          <div class="space-y-2">
+            <p class="text-white text-lg font-medium">Finding your perfect game...</p>
+            <p class="text-blue-200 text-sm">This might take a moment</p>
+          </div>
+        </div>
+
+        <!-- Enhanced empty state -->
+        <div v-else class="text-center py-16">
+          <div class="bg-white/5 backdrop-blur-sm rounded-3xl p-12 max-w-2xl mx-auto border border-white/10">
+            <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3">Ready to discover?</h3>
+            <p class="text-blue-200 text-lg mb-6">
+              Set your preferences above and click "Generate" to find your next favorite game!
+            </p>
+            <div class="flex flex-wrap justify-center gap-2 text-sm text-blue-300">
+              <span class="bg-white/10 px-3 py-1 rounded-full">🎮 Thousands of games</span>
+              <span class="bg-white/10 px-3 py-1 rounded-full">🔥 Personalized recommendations</span>
+              <span class="bg-white/10 px-3 py-1 rounded-full">⚡ Instant results</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- History of previously displayed games -->
+        <GameHistory :gameHistory="gameHistory" />
+
+        <!-- Enhanced error messages -->
+        <Transition name="slide-down">
+          <div v-if="error" class="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-100 px-6 py-4 rounded-2xl mt-6">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <span class="font-medium">{{ error }}</span>
+            </div>
+          </div>
+        </Transition>
+      </div>
     </div>
   </div>
 </template>
@@ -270,14 +325,106 @@ export default {
 </script>
 
 <style>
-/* Styles for loading spinner */
-.loading-spinner {
-  margin: 30px auto;  /* Centers spinner with vertical margins */
+/* Custom animations for enhanced UX */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
 }
 
-/* Styles for empty state when no game has been generated */
-.empty-state {
-  text-align: center;  /* Centers text */
-  padding: 40px 0;     /* Vertical padding for spacing */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility animations */
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+/* Vue transition classes */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Enhanced scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>

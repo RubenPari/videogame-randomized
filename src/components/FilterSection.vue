@@ -1,129 +1,189 @@
 <template>
-  <!-- Filter section to customize game search -->
-  <!-- Container with white background, rounded borders and shadow -->
-  <div class="filter-section bg-white rounded-lg p-5 shadow-sm mb-5">
-    <!-- Responsive grid: 1 column on mobile, 3 on desktop -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- Game genre selection -->
+  <!-- Modern glassmorphism filter section -->
+  <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
+    <!-- Filter header with icon -->
+    <div class="flex items-center mb-8">
+      <div class="bg-gradient-to-r from-purple-400 to-blue-400 p-3 rounded-2xl mr-4">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+        </svg>
+      </div>
       <div>
-        <label for="genreSelect" class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
-        <!-- Dropdown to select a specific genre or all genres -->
-        <select id="genreSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" v-model="localFilters.genre">
-          <option value="">All genres</option>
-          <!-- Dynamically generates options from available genres -->
-          <option v-for="genre in genres" :key="genre.id" :value="genre.id">
+        <h2 class="text-2xl font-bold text-white">Customize Your Search</h2>
+        <p class="text-blue-200">Fine-tune your preferences to find the perfect game</p>
+      </div>
+    </div>
+
+    <!-- Primary filters grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Genre selection with enhanced styling -->
+      <div class="space-y-3">
+        <label for="genreSelect" class="block text-sm font-semibold text-white flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+          </svg>
+          Genre
+        </label>
+        <select
+          id="genreSelect"
+          class="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200"
+          v-model="localFilters.genre"
+        >
+          <option value="" class="bg-gray-800 text-white">All genres</option>
+          <option v-for="genre in genres" :key="genre.id" :value="genre.id" class="bg-gray-800 text-white">
             {{ genre.name }}
           </option>
         </select>
       </div>
 
-      <!-- Slider to select minimum rating -->
-      <div>
-        <!-- Label showing the current rating value -->
-        <label for="ratingRange" class="block text-sm font-medium text-gray-700 mb-2"
-          >Minimum rating: {{ localFilters.minRating }}</label
-        >
-        <!-- Slider from 0 to 5 with 0.1 increments -->
-        <input
-          type="range"
-          class="w-full"
-          id="ratingRange"
-          min="0"
-          max="5"
-          step="0.1"
-          v-model="localFilters.minRating"
-        />
+      <!-- Rating slider with visual feedback -->
+      <div class="space-y-3">
+        <label for="ratingRange" class="block text-sm font-semibold text-white flex items-center justify-between">
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+            </svg>
+            Minimum Rating
+          </span>
+          <span class="bg-gradient-to-r from-purple-400 to-blue-400 px-3 py-1 rounded-full text-sm font-bold">
+            {{ localFilters.minRating }}★
+          </span>
+        </label>
+        <div class="relative">
+          <input
+            type="range"
+            class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+            id="ratingRange"
+            min="0"
+            max="5"
+            step="0.1"
+            v-model="localFilters.minRating"
+          />
+        </div>
       </div>
 
-      <!-- Year range selection to filter games by release date -->
-      <div>
-        <!-- Shows the currently selected range -->
-        <label for="yearRange" class="block text-sm font-medium text-gray-700 mb-2">Year range: {{ displayYearRange }}</label>
-        <div class="year-range-container">
-          <!-- Dropdown for start year -->
-          <div class="flex items-center">
-            <label class="text-sm mr-2">From:</label>
-            <select class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" v-model="localFilters.startYear">
-              <option v-for="year in availableYears" :key="'start-' + year" :value="year">
-                {{ year }}
-              </option>
-            </select>
-          </div>
-          <!-- Dropdown for end year -->
-          <div class="flex items-center mt-2">
-            <label class="text-sm mr-2">To:</label>
-            <select class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" v-model="localFilters.endYear">
-              <option v-for="year in availableYears" :key="'end-' + year" :value="year">
-                {{ year }}
-              </option>
-            </select>
-          </div>
+      <!-- Year range with modern selectors -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-white flex items-center justify-between">
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Release Period
+          </span>
+          <span class="text-blue-200 text-sm">{{ displayYearRange }}</span>
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <select class="px-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" v-model="localFilters.startYear">
+            <option v-for="year in availableYears" :key="'start-' + year" :value="year" class="bg-gray-800">
+              {{ year }}
+            </option>
+          </select>
+          <select class="px-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" v-model="localFilters.endYear">
+            <option v-for="year in availableYears" :key="'end-' + year" :value="year" class="bg-gray-800">
+              {{ year }}
+            </option>
+          </select>
         </div>
-        <!-- Button to reset year range to default values -->
-        <button class="px-3 py-1 text-sm border border-gray-400 rounded hover:bg-gray-100 mt-2" @click="resetYearRange">
-          Reset years
+        <button
+          class="text-blue-300 hover:text-white text-sm underline transition-colors duration-200"
+          @click="resetYearRange"
+        >
+          Reset to all years
         </button>
       </div>
     </div>
 
-    <!-- Second row: platform selection and sorting -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      <!-- Multiple platform selection -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Platform</label>
-        <!-- Scrollable container with checkbox for each platform -->
-        <div class="platform-select-container max-h-52 overflow-y-auto p-2 border border-gray-300 rounded-md bg-gray-50">
-          <!-- Checkbox for each available platform -->
-          <div v-for="platform in platforms" :key="platform.id" class="flex items-center mb-1">
-            <input
-              type="checkbox"
-              class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              :id="'platform-' + platform.id"
-              :value="platform.id"
-              v-model="selectedPlatforms"
-              @change="updatePlatforms"
-            />
-            <label class="text-sm" :for="'platform-' + platform.id">{{
-              platform.name
-            }}</label>
+    <!-- Secondary filters -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Platform selection with improved design -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-white flex items-center justify-between">
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Platforms
+          </span>
+          <span class="text-blue-200 text-sm">{{ selectedPlatforms.length }} selected</span>
+        </label>
+        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto custom-scrollbar">
+          <div class="space-y-2">
+            <div v-for="platform in platforms" :key="platform.id" class="flex items-center group">
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-400 focus:ring-2"
+                :id="'platform-' + platform.id"
+                :value="platform.id"
+                v-model="selectedPlatforms"
+                @change="updatePlatforms"
+              />
+              <label
+                class="ml-3 text-sm text-blue-100 group-hover:text-white cursor-pointer transition-colors duration-200"
+                :for="'platform-' + platform.id"
+              >
+                {{ platform.name }}
+              </label>
+            </div>
           </div>
-          <!-- Buttons to select/deselect all platforms -->
-          <!-- Shows only if there are more than 10 platforms -->
-          <div v-if="platforms.length > 10" class="mt-2">
-            <button class="px-3 py-1 text-sm border border-gray-400 rounded hover:bg-gray-100" @click="selectAllPlatforms">
-              Select all
+          <div v-if="platforms.length > 10" class="flex gap-2 mt-4 pt-4 border-t border-white/10">
+            <button
+              class="px-3 py-1 text-xs bg-purple-500/20 text-purple-200 rounded-lg hover:bg-purple-500/30 transition-colors duration-200"
+              @click="selectAllPlatforms"
+            >
+              Select All
             </button>
-            <button class="px-3 py-1 text-sm border border-gray-400 rounded hover:bg-gray-100 ml-2" @click="deselectAllPlatforms">
-              Deselect all
+            <button
+              class="px-3 py-1 text-xs bg-red-500/20 text-red-200 rounded-lg hover:bg-red-500/30 transition-colors duration-200"
+              @click="deselectAllPlatforms"
+            >
+              Clear All
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Sort criteria selection -->
-      <div>
-        <label for="orderSelect" class="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
-        <!-- Dropdown to choose how to sort results -->
-        <select id="orderSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" v-model="localFilters.ordering">
-          <option value="-rating">Rating (high→low)</option>          <!-- For descending rating -->
-          <option value="rating">Rating (low→high)</option>           <!-- For ascending rating -->
-          <option value="-released">Release date (recent→old)</option> <!-- Most recent release date first -->
-          <option value="released">Release date (old→recent)</option>  <!-- Oldest release date first -->
-          <option value="-added">Popularity (high→low)</option>       <!-- For descending popularity -->
+      <!-- Sort options with icon -->
+      <div class="space-y-3">
+        <label for="orderSelect" class="block text-sm font-semibold text-white flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
+          </svg>
+          Sort Results
+        </label>
+        <select
+          id="orderSelect"
+          class="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200"
+          v-model="localFilters.ordering"
+        >
+          <option value="-rating" class="bg-gray-800">🌟 Best Rated First</option>
+          <option value="rating" class="bg-gray-800">⭐ Lowest Rated First</option>
+          <option value="-released" class="bg-gray-800">🗓️ Newest First</option>
+          <option value="released" class="bg-gray-800">📅 Oldest First</option>
+          <option value="-added" class="bg-gray-800">🔥 Most Popular</option>
         </select>
       </div>
     </div>
 
-    <!-- Main button to generate a random game -->
-    <!-- Disabled during loading, shows animated spinner -->
-    <button class="w-full py-3 px-4 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors mt-4 disabled:bg-gray-400" @click="onGenerate" :disabled="isLoading">
-      <!-- Loading state with spinner -->
+    <!-- Generate button with enhanced design -->
+    <button
+      class="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none group"
+      @click="onGenerate"
+      :disabled="isLoading"
+    >
       <span v-if="isLoading" class="flex items-center justify-center">
-        <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
-        Generating...
+        <svg class="animate-spin h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Generating Magic...
       </span>
-      <!-- Normal state -->
-      <span v-else>Generate Random Video Game</span>
+      <span v-else class="flex items-center justify-center">
+        <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Discover Your Next Adventure
+      </span>
     </button>
   </div>
 </template>
@@ -281,9 +341,73 @@ export default {
 </script>
 
 <style scoped>
-/* Styles specific to this component */
-/* Container for year range selection */
-.year-range-container {
-  margin-top: 5px;  /* Small top margin for spacing */
+/* Enhanced slider styling */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  border: 2px solid white;
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  border: 2px solid white;
+}
+
+.slider::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+}
+
+/* Custom scrollbar for platform selection */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.6);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8);
+}
+
+/* Enhanced focus states */
+select:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Smooth transitions for all interactive elements */
+input, select, button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover effects for labels */
+label:hover {
+  transform: translateX(2px);
+  transition: transform 0.2s ease;
 }
 </style>

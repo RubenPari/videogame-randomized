@@ -3,9 +3,31 @@
   <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
     <!-- Animated background elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-4 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div class="absolute -bottom-8 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      <div
+        class="absolute -top-4 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob">
+      </div>
+      <div
+        class="absolute -bottom-8 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000">
+      </div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000">
+      </div>
+    </div>
+
+    <!-- Saved Games Button - Fixed position -->
+    <div class="fixed top-6 right-6 z-40">
+      <button @click="openSavedGamesModal"
+        class="flex items-center px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105 shadow-xl"
+        :title="`View your saved games (${savedGamesCount})`">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+        </svg>
+        <span class="font-medium">Saved Games</span>
+        <span v-if="savedGamesCount > 0" class="ml-2 px-2 py-1 bg-purple-500 text-white text-xs rounded-full font-bold">
+          {{ savedGamesCount }}
+        </span>
+      </button>
     </div>
 
     <!-- Main content container -->
@@ -15,11 +37,14 @@
         <div class="inline-flex items-center justify-center p-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
           <div class="bg-gradient-to-r from-purple-400 to-blue-400 p-3 rounded-full">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+              </path>
             </svg>
           </div>
         </div>
-        <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent leading-tight">
+        <h1
+          class="text-4xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent leading-tight">
           Random Video Game Generator
         </h1>
         <p class="text-xl text-blue-100 max-w-2xl mx-auto">
@@ -28,32 +53,26 @@
       </div>
 
       <!-- Filter section with glassmorphism design -->
-      <FilterSection
-        :genres="genres"
-        :platforms="platforms"
-        :filters="filters"
-        :isLoading="isLoading"
-        @generate="generateRandomGame"
-        class="mb-8"
-      />
+      <FilterSection :genres="genres" :platforms="platforms" :filters="filters" :isLoading="isLoading"
+        @generate="generateRandomGame" class="mb-8" />
 
       <!-- Game result section -->
       <div class="space-y-8">
         <!-- Currently selected game card -->
-        <GameCard
-          v-if="currentGame"
-          :game="currentGame"
-          :description="gameDescription"
-          class="animate-fade-in-up"
-        />
+        <GameCard v-if="currentGame" :game="currentGame" :description="gameDescription" @game-saved="onGameSaved"
+          @game-removed="onGameRemoved" class="animate-fade-in-up" />
 
         <!-- Enhanced loading state -->
         <div v-else-if="isLoading" class="text-center py-16">
           <div class="relative">
             <!-- Outer spinning ring -->
-            <div class="w-20 h-20 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <div
+              class="w-20 h-20 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto mb-4">
+            </div>
             <!-- Inner pulsing dot -->
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-400 rounded-full animate-pulse"></div>
+            <div
+              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-400 rounded-full animate-pulse">
+            </div>
           </div>
           <div class="space-y-2">
             <p class="text-white text-lg font-medium">Finding your perfect game...</p>
@@ -64,9 +83,11 @@
         <!-- Enhanced empty state -->
         <div v-else class="text-center py-16">
           <div class="bg-white/5 backdrop-blur-sm rounded-3xl p-12 max-w-2xl mx-auto border border-white/10">
-            <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                </path>
               </svg>
             </div>
             <h3 class="text-2xl font-bold text-white mb-3">Ready to discover?</h3>
@@ -86,10 +107,13 @@
 
         <!-- Enhanced error messages -->
         <Transition name="slide-down">
-          <div v-if="error" class="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-100 px-6 py-4 rounded-2xl mt-6">
+          <div v-if="error"
+            class="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-100 px-6 py-4 rounded-2xl mt-6">
             <div class="flex items-center">
               <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z">
+                </path>
               </svg>
               <span class="font-medium">{{ error }}</span>
             </div>
@@ -97,6 +121,10 @@
         </Transition>
       </div>
     </div>
+
+    <!-- Saved Games Modal -->
+    <SavedGamesModal :show="showSavedGamesModal" @close="closeSavedGamesModal" @game-removed="onGameRemoved"
+      @games-cleared="onGamesClear" />
   </div>
 </template>
 
@@ -105,12 +133,16 @@
 import FilterSection from './components/FilterSection.vue'
 import GameCard from './components/GameCard.vue'
 import GameHistory from './components/GameHistory.vue'
+import SavedGamesModal from './components/SaveGamesModal.vue'
 // API service to communicate with RAWG API
 import apiService from './services/api'
+// Database service to manage saved games
+import databaseService from './services/database'
 
 /**
  * Main component of the Random Video Game Generator application
  * Manages the global state of the app and coordinates child components
+ * Now includes save/remove functionality for games
  */
 export default {
   name: 'App',
@@ -120,6 +152,7 @@ export default {
     FilterSection,
     GameCard,
     GameHistory,
+    SavedGamesModal,
   },
 
   /**
@@ -149,6 +182,8 @@ export default {
       // Application state
       isLoading: false,                        // Flag to indicate loading in progress
       error: null,                             // Error message to display
+      showSavedGamesModal: false,              // Flag to show/hide saved games modal
+      savedGamesCount: 0,                      // Count of saved games
     }
   },
 
@@ -159,6 +194,7 @@ export default {
   created() {
     this.fetchGenres()
     this.fetchPlatforms()
+    this.updateSavedGamesCount()
   },
 
   methods: {
@@ -320,6 +356,57 @@ export default {
         this.gameDescription = 'Description not available.'
       }
     },
+
+    /**
+     * Updates the count of saved games
+     * Called when games are added or removed
+     */
+    async updateSavedGamesCount() {
+      const savedGames = await databaseService.getSavedGames()
+      this.savedGamesCount = savedGames.length
+    },
+
+    /**
+     * Handles when a game is saved from GameCard
+     * @param {Object} game - The saved game object
+     */
+    onGameSaved(game) {
+      this.updateSavedGamesCount()
+      console.log('Game saved:', game.name)
+    },
+
+    /**
+     * Handles when a game is removed from GameCard or SavedGamesModal
+     * @param {number} gameId - ID of the removed game
+     */
+    onGameRemoved(gameId) {
+      this.updateSavedGamesCount()
+      console.log('Game removed:', gameId)
+    },
+
+    /**
+     * Handles when all saved games are cleared
+     */
+    onGamesClear() {
+      this.updateSavedGamesCount()
+      console.log('All saved games cleared')
+    },
+
+    /**
+     * Opens the saved games modal
+     */
+    openSavedGamesModal() {
+      this.showSavedGamesModal = true
+    },
+
+    /**
+     * Closes the saved games modal
+     */
+    closeSavedGamesModal() {
+      this.showSavedGamesModal = false
+      // Update count when modal closes (in case changes were made)
+      this.updateSavedGamesCount()
+    },
   },
 }
 </script>
@@ -330,12 +417,15 @@ export default {
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }
@@ -346,6 +436,7 @@ export default {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -357,6 +448,7 @@ export default {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);

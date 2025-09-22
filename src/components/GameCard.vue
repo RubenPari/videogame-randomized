@@ -1,23 +1,47 @@
 <template>
   <!-- Modern game card with glassmorphism and enhanced layout -->
   <div v-if="game" class="game-card-container group">
-    <div class="bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-purple-500/20">
+    <div
+      class="bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-purple-500/20">
       <!-- Hero image section with overlay -->
       <div class="relative h-64 md:h-80 overflow-hidden">
         <!-- Game background image with gradient overlay -->
-        <img
-          :src="game.background_image || '/placeholder-game.jpg'"
-          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          :alt="game.name"
-        />
+        <img :src="game.background_image || '/placeholder-game.jpg'"
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" :alt="game.name" />
         <!-- Gradient overlay for better text readability -->
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-        <!-- Floating rating badge -->
+        <!-- Save/Remove button - Top Left -->
+        <div class="absolute top-4 left-4">
+          <button @click="toggleSaveGame" :class="[
+            'flex items-center px-3 py-2 rounded-2xl backdrop-blur-sm border shadow-lg transition-all duration-300 transform hover:scale-105',
+            isSaved
+              ? 'bg-red-500/80 border-red-400/50 text-white hover:bg-red-600/80'
+              : 'bg-green-500/80 border-green-400/50 text-white hover:bg-green-600/80'
+          ]" :title="isSaved ? 'Remove from saved games' : 'Save to collection'">
+            <svg v-if="isSaved" class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"></path>
+            </svg>
+            <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+            </svg>
+            <span class="text-sm font-medium">
+              {{ isSaved ? 'Saved' : 'Save' }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Floating rating badge - Top Right -->
         <div class="absolute top-4 right-4">
-          <div :class="['flex items-center px-3 py-2 rounded-2xl backdrop-blur-sm border border-white/30 shadow-lg', getRatingClass(game.rating)]">
+          <div
+            :class="['flex items-center px-3 py-2 rounded-2xl backdrop-blur-sm border border-white/30 shadow-lg', getRatingClass(game.rating)]">
             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+              </path>
             </svg>
             <span class="text-sm font-bold">{{ game.rating.toFixed(1) }}</span>
           </div>
@@ -31,7 +55,8 @@
           <!-- Release date with icon -->
           <div class="flex items-center text-blue-200">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <span class="text-sm font-medium">{{ formatDate(game.released) }}</span>
           </div>
@@ -40,13 +65,22 @@
 
       <!-- Card content section -->
       <div class="p-6 md:p-8 space-y-6">
+        <!-- Save status indicator -->
+        <div v-if="isSaved" class="bg-green-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-4">
+          <div class="flex items-center text-green-200">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">This game is saved in your collection</span>
+          </div>
+        </div>
+
         <!-- Genre tags -->
         <div class="flex flex-wrap gap-2">
-          <span
-            v-for="genre in game.genres"
-            :key="genre.id"
-            class="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-200 text-sm font-medium rounded-full border border-purple-400/30 backdrop-blur-sm hover:from-purple-500/30 hover:to-blue-500/30 transition-colors duration-200"
-          >
+          <span v-for="genre in game.genres" :key="genre.id"
+            class="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-200 text-sm font-medium rounded-full border border-purple-400/30 backdrop-blur-sm hover:from-purple-500/30 hover:to-blue-500/30 transition-colors duration-200">
             {{ genre.name }}
           </span>
         </div>
@@ -55,7 +89,9 @@
         <div class="space-y-3">
           <h3 class="text-lg font-semibold text-white flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
             </svg>
             Description
           </h3>
@@ -70,16 +106,15 @@
         <div class="space-y-3">
           <h3 class="text-lg font-semibold text-white flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+              </path>
             </svg>
             Available Platforms
           </h3>
           <div class="flex flex-wrap gap-2">
-            <span
-              v-for="platform in game.platforms"
-              :key="platform.platform.id"
-              class="px-3 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-colors duration-200 flex items-center"
-            >
+            <span v-for="platform in game.platforms" :key="platform.platform.id"
+              class="px-3 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-colors duration-200 flex items-center">
               <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
               {{ platform.platform.name }}
             </span>
@@ -103,21 +138,44 @@
         </div>
       </div>
     </div>
+
+    <!-- Success/Error notifications -->
+    <Transition name="notification">
+      <div v-if="showNotification" :class="[
+        'fixed top-4 right-4 z-50 px-6 py-4 rounded-2xl backdrop-blur-sm border shadow-xl transform transition-all duration-300',
+        notificationType === 'success'
+          ? 'bg-green-500/90 border-green-400/50 text-white'
+          : 'bg-red-500/90 border-red-400/50 text-white'
+      ]">
+        <div class="flex items-center">
+          <svg v-if="notificationType === 'success'" class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"></path>
+          </svg>
+          <svg v-else class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium">{{ notificationMessage }}</span>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script>
+import databaseService from '@/services/database'
+
 /**
- * GameCard Component
+ * GameCard Component with Save/Remove functionality
  *
- * Displays detailed information for a single game:
- * - Background image
- * - Name and rating
- * - Release date and genres
- * - Translated description
- * - Available platforms
- *
- * Includes utilities for formatting dates and determining rating colors
+ * Displays detailed information for a single game and allows users to:
+ * - Save games to their personal collection
+ * - Remove games from their collection
+ * - View save status with visual indicators
+ * - Get notifications for save/remove actions
  */
 export default {
   name: 'GameCard',
@@ -136,7 +194,93 @@ export default {
     },
   },
 
+  data() {
+    return {
+      // Track whether the current game is saved
+      isSaved: false,
+      // Control notification display
+      showNotification: false,
+      notificationType: 'success', // 'success' or 'error'
+      notificationMessage: '',
+    }
+  },
+
+  watch: {
+    // Watch for game changes to update save status
+    game: {
+      handler(newGame) {
+        if (newGame) {
+          this.checkSaveStatus()
+        }
+      },
+      immediate: true
+    }
+  },
+
   methods: {
+    /**
+     * Checks if the current game is saved in the database
+     */
+    async checkSaveStatus() {
+      if (this.game) {
+        this.isSaved = await databaseService.isGameSaved(this.game.id)
+      }
+    },
+
+    /**
+     * Toggles the save status of the current game
+     */
+    async toggleSaveGame() {
+      if (!this.game) return
+
+      try {
+        if (this.isSaved) {
+          // Remove the game from saved collection
+          const success = await databaseService.removeGame(this.game.id)
+
+          if (success) {
+            this.isSaved = false
+            this.showNotificationMessage('Game removed from your collection', 'success')
+            // Emit event to parent component
+            this.$emit('game-removed', this.game.id)
+          } else {
+            this.showNotificationMessage('Error removing game', 'error')
+          }
+        } else {
+          // Save the game to collection
+          const success = await databaseService.saveGame(this.game)
+
+          if (success) {
+            this.isSaved = true
+            this.showNotificationMessage('Game saved to your collection', 'success')
+            // Emit event to parent component
+            this.$emit('game-saved', this.game)
+          } else {
+            this.showNotificationMessage('Error saving game', 'error')
+          }
+        }
+      } catch (error) {
+        console.error('Error toggling save status:', error)
+        this.showNotificationMessage('An unexpected error occurred', 'error')
+      }
+    },
+
+    /**
+     * Shows a notification message
+     * @param {string} message - The message to display
+     * @param {string} type - The type of notification ('success' or 'error')
+     */
+    showNotificationMessage(message, type = 'success') {
+      this.notificationMessage = message
+      this.notificationType = type
+      this.showNotification = true
+
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        this.showNotification = false
+      }, 3000)
+    },
+
     /**
      * Formats an ISO date into a readable Italian format
      * @param {string} dateString - Date in ISO format (YYYY-MM-DD)
@@ -192,6 +336,37 @@ export default {
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 
+/* Save button hover effects */
+.save-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.save-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Save button active state */
+.save-button:active {
+  transform: scale(0.98);
+}
+
+/* Notification animations */
+.notification-enter-active,
+.notification-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notification-enter-from {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
+}
+
+.notification-leave-to {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
+}
+
 /* Custom scrollbar for description if needed */
 .description-container::-webkit-scrollbar {
   width: 4px;
@@ -209,16 +384,36 @@ export default {
 
 /* Floating animation for rating badge */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-4px);
   }
 }
 
-.game-card-container:hover .absolute.top-4.right-4 > div {
+.game-card-container:hover .absolute.top-4.right-4>div {
   animation: float 2s ease-in-out infinite;
+}
+
+/* Save status indicator pulse effect */
+.bg-green-500\/20 {
+  animation: subtlePulse 2s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Genre tag hover effects */
@@ -239,13 +434,34 @@ export default {
 }
 
 /* Stats animation on hover */
-.game-card-container:hover .grid > div {
+.game-card-container:hover .grid>div {
   animation: statsGlow 0.5s ease-in-out;
 }
 
 @keyframes statsGlow {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Enhanced button interactions */
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+button:active {
+  transform: scale(0.98);
 }
 </style>

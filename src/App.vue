@@ -1,128 +1,67 @@
 <template>
-  <!-- Modern full-screen app with gradient background -->
-  <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-    <!-- Animated background elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div
-        class="absolute -top-4 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob">
-      </div>
-      <div
-        class="absolute -bottom-8 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000">
-      </div>
-      <div
-        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000">
-      </div>
-    </div>
-
-    <!-- Saved Games Button - Fixed position -->
-    <div class="fixed top-6 right-6 z-40">
-      <button @click="openSavedGamesModal"
-        class="flex items-center px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105 shadow-xl"
-        :title="`View your saved games (${savedGamesCount})`">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-        </svg>
-        <span class="font-medium">Saved Games</span>
-        <span v-if="savedGamesCount > 0" class="ml-2 px-2 py-1 bg-purple-500 text-white text-xs rounded-full font-bold">
-          {{ savedGamesCount }}
-        </span>
-      </button>
-    </div>
-
-    <!-- Main content container -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Hero section with improved typography -->
-      <div class="text-center mb-12">
-        <div class="inline-flex items-center justify-center p-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
-          <div class="bg-gradient-to-r from-purple-400 to-blue-400 p-3 rounded-full">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-              </path>
-            </svg>
+  <div class="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-cyan-500/30">
+    <header class="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-cyan-500 text-zinc-950 flex items-center justify-center rounded-lg font-black text-xl transform -skew-x-6">
+            VG
           </div>
+          <h1 class="text-2xl font-black text-white tracking-tight uppercase italic">
+            Random<span class="text-cyan-400">Generator</span>
+          </h1>
         </div>
-        <h1
-          class="text-4xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent leading-tight">
-          Random Video Game Generator
-        </h1>
-        <p class="text-xl text-blue-100 max-w-2xl mx-auto">
-          Discover your next gaming adventure with our intelligent recommendation system
-        </p>
+        <button @click="openSavedGamesModal"
+          class="group flex items-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-fuchsia-500/50 rounded-xl transition-all">
+          <svg class="w-5 h-5 text-fuchsia-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+          </svg>
+          <span class="font-bold text-white uppercase text-sm tracking-wider hidden sm:block">Vault</span>
+          <span v-if="savedGamesCount > 0" class="flex h-5 w-5 items-center justify-center rounded-md bg-fuchsia-500 text-[10px] font-black text-zinc-950 ml-1">
+            {{ savedGamesCount }}
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
+      <div class="w-full lg:w-1/3 lg:sticky lg:top-28 h-fit">
+        <FilterSection :genres="genres" :platforms="platforms" :filters="filters" :isLoading="isLoading"
+          @generate="generateRandomGame" />
       </div>
 
-      <!-- Filter section with glassmorphism design -->
-      <FilterSection :genres="genres" :platforms="platforms" :filters="filters" :isLoading="isLoading"
-        @generate="generateRandomGame" class="mb-8" />
-
-      <!-- Game result section -->
-      <div class="space-y-8">
-        <!-- Currently selected game card -->
-        <GameCard v-if="currentGame" :game="currentGame" :description="gameDescription" @game-saved="onGameSaved"
-          @game-removed="onGameRemoved" class="animate-fade-in-up" />
-
-        <!-- Enhanced loading state -->
-        <div v-else-if="isLoading" class="text-center py-16">
-          <div class="relative">
-            <!-- Outer spinning ring -->
-            <div
-              class="w-20 h-20 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto mb-4">
-            </div>
-            <!-- Inner pulsing dot -->
-            <div
-              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-400 rounded-full animate-pulse">
-            </div>
+      <div class="w-full lg:w-2/3 space-y-8 flex flex-col">
+        <div class="min-h-[400px] flex flex-col relative">
+          <GameCard v-if="currentGame" :game="currentGame" :description="gameDescription" @game-saved="onGameSaved"
+            @game-removed="onGameRemoved" class="animate-fade-in" />
+            
+          <div v-else-if="isLoading" class="flex-1 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30 p-12">
+            <div class="w-16 h-16 border-4 border-zinc-800 border-t-cyan-500 rounded-full animate-spin mb-6"></div>
+            <p class="text-cyan-400 font-mono text-sm uppercase tracking-widest animate-pulse">Initializing Protocol...</p>
           </div>
-          <div class="space-y-2">
-            <p class="text-white text-lg font-medium">Finding your perfect game...</p>
-            <p class="text-blue-200 text-sm">This might take a moment</p>
-          </div>
-        </div>
 
-        <!-- Enhanced empty state -->
-        <div v-else class="text-center py-16">
-          <div class="bg-white/5 backdrop-blur-sm rounded-3xl p-12 max-w-2xl mx-auto border border-white/10">
-            <div
-              class="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
-                </path>
+          <div v-else class="flex-1 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30 p-12 text-center">
+            <div class="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+              <svg class="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-3">Ready to discover?</h3>
-            <p class="text-blue-200 text-lg mb-6">
-              Set your preferences above and click "Generate" to find your next favorite game!
+            <h3 class="text-lg font-black text-white mb-2 uppercase tracking-widest">Awaiting Input</h3>
+            <p class="text-zinc-500 text-sm max-w-sm">
+              Configure parameters and engage sequence to discover.
             </p>
-            <div class="flex flex-wrap justify-center gap-2 text-sm text-blue-300">
-              <span class="bg-white/10 px-3 py-1 rounded-full">🎮 Thousands of games</span>
-              <span class="bg-white/10 px-3 py-1 rounded-full">🔥 Personalized recommendations</span>
-              <span class="bg-white/10 px-3 py-1 rounded-full">⚡ Instant results</span>
-            </div>
           </div>
         </div>
 
-        <!-- History of previously displayed games -->
-        <GameHistory :gameHistory="gameHistory" />
-
-        <!-- Enhanced error messages -->
-        <Transition name="slide-down">
-          <div v-if="error"
-            class="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-100 px-6 py-4 rounded-2xl mt-6">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z">
-                </path>
-              </svg>
-              <span class="font-medium">{{ error }}</span>
-            </div>
-          </div>
-        </Transition>
+        <GameHistory :gameHistory="gameHistory" @clear-history="gameHistory = []" />
+        
+        <div v-if="error" class="bg-red-500/10 border-l-2 border-red-500 text-red-400 p-4 rounded-r-xl text-sm font-mono">
+          <p class="font-bold uppercase tracking-wider mb-1">System Error</p>
+          <p>{{ error }}</p>
+        </div>
       </div>
-    </div>
+    </main>
 
-    <!-- Saved Games Modal -->
     <SavedGamesModal :show="showSavedGamesModal" @close="closeSavedGamesModal" @game-removed="onGameRemoved"
       @games-cleared="onGamesClear" />
   </div>
@@ -412,111 +351,11 @@ export default {
 </script>
 
 <style>
-/* Custom animations for enhanced UX */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-down {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Utility animations */
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out;
-}
-
-/* Vue transition classes */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-/* Enhanced scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-/* Glassmorphism utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.glass-dark {
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+body { background-color: #09090b; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #09090b; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 </style>

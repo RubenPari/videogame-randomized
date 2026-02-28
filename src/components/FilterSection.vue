@@ -1,188 +1,113 @@
 <template>
-  <!-- Modern glassmorphism filter section -->
-  <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-    <!-- Filter header with icon -->
-    <div class="flex items-center mb-8">
-      <div class="bg-gradient-to-r from-purple-400 to-blue-400 p-3 rounded-2xl mr-4">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+    <div class="mb-6 pb-4 border-b border-zinc-800">
+      <h2 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
         </svg>
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-white">Customize Your Search</h2>
-        <p class="text-blue-200">Fine-tune your preferences to find the perfect game</p>
-      </div>
+        Search Parameters
+      </h2>
     </div>
 
-    <!-- Primary filters grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- Genre selection with enhanced styling -->
-      <div class="space-y-3">
-        <label for="genreSelect" class="block text-sm font-semibold text-white flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-          </svg>
-          Genre
-        </label>
-        <select
-          id="genreSelect"
-          class="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200"
-          v-model="localFilters.genre"
-        >
-          <option value="" class="bg-gray-800 text-white">All genres</option>
-          <option v-for="genre in genres" :key="genre.id" :value="genre.id" class="bg-gray-800 text-white">
-            {{ genre.name }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Rating slider with visual feedback -->
-      <div class="space-y-3">
-        <label for="ratingRange" class="block text-sm font-semibold text-white flex items-center justify-between">
-          <span class="flex items-center">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
-            Minimum Rating
-          </span>
-          <span class="bg-gradient-to-r from-purple-400 to-blue-400 px-3 py-1 rounded-full text-sm font-bold">
-            {{ localFilters.minRating }}★
-          </span>
-        </label>
+    <div class="space-y-6">
+      <div class="space-y-2">
+        <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Target Genre</label>
         <div class="relative">
-          <input
-            type="range"
-            class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-            id="ratingRange"
-            min="0"
-            max="5"
-            step="0.1"
-            v-model="localFilters.minRating"
-          />
-        </div>
-      </div>
-
-      <!-- Year range with modern selectors -->
-      <div class="space-y-3">
-        <label class="block text-sm font-semibold text-white flex items-center justify-between">
-          <span class="flex items-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            Release Period
-          </span>
-          <span class="text-blue-200 text-sm">{{ displayYearRange }}</span>
-        </label>
-        <div class="grid grid-cols-2 gap-2">
-          <select class="px-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" v-model="localFilters.startYear">
-            <option v-for="year in availableYears" :key="'start-' + year" :value="year" class="bg-gray-800">
-              {{ year }}
-            </option>
+          <select v-model="localFilters.genre" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors">
+            <option value="">ALL CLASSIFICATIONS</option>
+            <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name.toUpperCase() }}</option>
           </select>
-          <select class="px-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" v-model="localFilters.endYear">
-            <option v-for="year in availableYears" :key="'end-' + year" :value="year" class="bg-gray-800">
-              {{ year }}
-            </option>
-          </select>
-        </div>
-        <button
-          class="text-blue-300 hover:text-white text-sm underline transition-colors duration-200"
-          @click="resetYearRange"
-        >
-          Reset to all years
-        </button>
-      </div>
-    </div>
-
-    <!-- Secondary filters -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <!-- Platform selection with improved design -->
-      <div class="space-y-3">
-        <label class="block text-sm font-semibold text-white flex items-center justify-between">
-          <span class="flex items-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-            Platforms
-          </span>
-          <span class="text-blue-200 text-sm">{{ selectedPlatforms.length }} selected</span>
-        </label>
-        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto custom-scrollbar">
-          <div class="space-y-2">
-            <div v-for="platform in platforms" :key="platform.id" class="flex items-center group">
-              <input
-                type="checkbox"
-                class="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-400 focus:ring-2"
-                :id="'platform-' + platform.id"
-                :value="platform.id"
-                v-model="selectedPlatforms"
-                @change="updatePlatforms"
-              />
-              <label
-                class="ml-3 text-sm text-blue-100 group-hover:text-white cursor-pointer transition-colors duration-200"
-                :for="'platform-' + platform.id"
-              >
-                {{ platform.name }}
-              </label>
-            </div>
-          </div>
-          <div v-if="platforms.length > 10" class="flex gap-2 mt-4 pt-4 border-t border-white/10">
-            <button
-              class="px-3 py-1 text-xs bg-purple-500/20 text-purple-200 rounded-lg hover:bg-purple-500/30 transition-colors duration-200"
-              @click="selectAllPlatforms"
-            >
-              Select All
-            </button>
-            <button
-              class="px-3 py-1 text-xs bg-red-500/20 text-red-200 rounded-lg hover:bg-red-500/30 transition-colors duration-200"
-              @click="deselectAllPlatforms"
-            >
-              Clear All
-            </button>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-600">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </div>
         </div>
       </div>
 
-      <!-- Sort options with icon -->
-      <div class="space-y-3">
-        <label for="orderSelect" class="block text-sm font-semibold text-white flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
-          </svg>
-          Sort Results
-        </label>
-        <select
-          id="orderSelect"
-          class="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200"
-          v-model="localFilters.ordering"
-        >
-          <option value="-rating" class="bg-gray-800">🌟 Best Rated First</option>
-          <option value="rating" class="bg-gray-800">⭐ Lowest Rated First</option>
-          <option value="-released" class="bg-gray-800">🗓️ Newest First</option>
-          <option value="released" class="bg-gray-800">📅 Oldest First</option>
-          <option value="-added" class="bg-gray-800">🔥 Most Popular</option>
-        </select>
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Min Rating</label>
+          <span class="text-cyan-400 font-mono text-sm font-bold">{{ Number(localFilters.minRating).toFixed(1) }}</span>
+        </div>
+        <input type="range" min="0" max="5" step="0.1" v-model="localFilters.minRating"
+          class="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-cyan-500" />
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Timeline</label>
+          <button @click="resetYearRange" class="text-[10px] text-zinc-600 hover:text-cyan-400 uppercase font-bold tracking-wider transition-colors">Reset</button>
+        </div>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+             <select v-model="localFilters.startYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
+                <option :value="null">START</option>
+                <option v-for="year in availableYears" :key="'s'+year" :value="year">{{ year }}</option>
+             </select>
+          </div>
+          <div class="flex items-center text-zinc-700 text-xs">-</div>
+          <div class="relative flex-1">
+             <select v-model="localFilters.endYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
+                <option :value="null">END</option>
+                <option v-for="year in availableYears" :key="'e'+year" :value="year">{{ year }}</option>
+             </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Hardware</label>
+          <span class="text-[10px] font-mono text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded">{{ selectedPlatforms.length }} SEL</span>
+        </div>
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 h-40 overflow-y-auto custom-scrollbar">
+          <div class="space-y-0.5">
+            <label v-for="platform in platforms" :key="platform.id" class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-900 cursor-pointer transition-colors">
+              <div class="relative flex items-center">
+                <input type="checkbox" :value="platform.id" v-model="selectedPlatforms" @change="updatePlatforms"
+                  class="peer appearance-none w-4 h-4 border border-zinc-700 rounded bg-zinc-950 checked:bg-cyan-500 checked:border-cyan-500 transition-all cursor-pointer" />
+                <svg class="absolute w-3 h-3 text-zinc-950 opacity-0 peer-checked:opacity-100 left-0.5 top-0.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-xs text-zinc-400 select-none peer-checked:text-white">{{ platform.name }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button @click="selectAllPlatforms" class="flex-1 py-1.5 bg-zinc-950 border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors">All</button>
+          <button @click="deselectAllPlatforms" class="flex-1 py-1.5 bg-zinc-950 border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors">None</button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Sort Protocol</label>
+        <div class="relative">
+          <select v-model="localFilters.ordering" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors">
+            <option value="-rating">Highest Rating</option>
+            <option value="rating">Lowest Rating</option>
+            <option value="-released">Latest Release</option>
+            <option value="released">Earliest Release</option>
+            <option value="-added">Most Popular</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-600">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Generate button with enhanced design -->
-    <button
-      class="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none group"
-      @click="onGenerate"
-      :disabled="isLoading"
-    >
-      <span v-if="isLoading" class="flex items-center justify-center">
-        <svg class="animate-spin h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24">
+    <button @click="onGenerate" :disabled="isLoading"
+      class="mt-8 w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-black text-sm uppercase tracking-widest rounded-xl transition-all transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+      <span v-if="isLoading" class="flex items-center gap-2">
+        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Generating Magic...
+        PROCESSING...
       </span>
-      <span v-else class="flex items-center justify-center">
-        <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-        </svg>
-        Discover Your Next Adventure
+      <span v-else class="flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        ENGAGE SCANNER
       </span>
     </button>
   </div>
@@ -341,73 +266,8 @@ export default {
 </script>
 
 <style scoped>
-/* Enhanced slider styling */
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-  border: 2px solid white;
-}
-
-.slider::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-  border: 2px solid white;
-}
-
-.slider::-webkit-slider-track {
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.slider::-moz-range-track {
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-}
-
-/* Custom scrollbar for platform selection */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.6);
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.8);
-}
-
-/* Enhanced focus states */
-select:focus {
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
-}
-
-/* Smooth transitions for all interactive elements */
-input, select, button {
-  transition: all 0.2s ease-in-out;
-}
-
-/* Hover effects for labels */
-label:hover {
-  transform: translateX(2px);
-  transition: transform 0.2s ease;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 </style>

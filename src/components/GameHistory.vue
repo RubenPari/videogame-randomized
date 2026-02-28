@@ -1,3 +1,13 @@
+<script setup>
+defineProps({
+  gameHistory: { type: Array, default: () => [] }
+})
+
+const emit = defineEmits(['clear-history'])
+
+const onClear = () => emit('clear-history')
+</script>
+
 <template>
   <div v-if="gameHistory.length > 0" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-lg">
     <div class="flex items-center justify-between mb-4 pb-4 border-b border-zinc-800">
@@ -7,7 +17,7 @@
         </svg>
         Session Log
       </h3>
-      <button @click="$emit('clear-history')" class="text-[10px] font-bold text-zinc-600 hover:text-red-400 uppercase tracking-widest transition-colors bg-zinc-950 px-2 py-1 rounded border border-zinc-800 hover:border-red-500/50">
+      <button @click="onClear" class="text-[10px] font-bold text-zinc-600 hover:text-red-400 uppercase tracking-widest transition-colors bg-zinc-950 px-2 py-1 rounded border border-zinc-800 hover:border-red-500/50">
         Purge
       </button>
     </div>
@@ -24,35 +34,6 @@
     </div>
   </div>
 </template>
-
-<script>
-/**
- * GameHistory Component
- *
- * Displays the history of games already viewed during the current session.
- * This component helps the user keep track of which games have already been
- * generated, avoiding duplicates and providing a visual reference.
- *
- * Features:
- * - Shows only if there are games in the history
- * - Games are displayed as clickable tags
- * - Responsive layout with flex-wrap
- * - Hover effects to improve interactivity
- */
-export default {
-  name: 'GameHistory',
-
-  // Props received from the parent component (App.vue)
-  props: {
-    // Array containing the history of displayed games
-    // Each element has at least { id, name }
-    gameHistory: {
-      type: Array,
-      default: () => [],
-    },
-  },
-}
-</script>
 
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

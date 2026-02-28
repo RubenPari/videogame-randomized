@@ -1,3 +1,40 @@
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  genres: { type: Array, default: () => [] },
+  platforms: { type: Array, default: () => [] },
+  isLoading: { type: Boolean, default: false }
+})
+
+// Two-way binding for filters using defineModel (Vue 3.4+)
+const filters = defineModel({ required: true })
+
+const emit = defineEmits(['generate'])
+
+// Computed
+const availableYears = computed(() => {
+  const currentYear = new Date().getFullYear()
+  return Array.from({ length: currentYear - 1980 + 1 }, (_, i) => currentYear - i)
+})
+
+// Methods
+const selectAllPlatforms = () => {
+  filters.value.platforms = props.platforms.map(p => p.id)
+}
+
+const deselectAllPlatforms = () => {
+  filters.value.platforms = []
+}
+
+const resetYearRange = () => {
+  filters.value.startYear = null
+  filters.value.endYear = null
+}
+
+const onGenerate = () => emit('generate')
+</script>
+
 <template>
   <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
     <div class="mb-6 pb-4 border-b border-zinc-800">
@@ -10,10 +47,11 @@
     </div>
 
     <div class="space-y-6">
+      <!-- Genre -->
       <div class="space-y-2">
         <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Target Genre</label>
         <div class="relative">
-          <select v-model="localFilters.genre" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors">
+          <select v-model="filters.genre" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors">
             <option value="">ALL CLASSIFICATIONS</option>
             <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name.toUpperCase() }}</option>
           </select>
@@ -23,47 +61,46 @@
         </div>
       </div>
 
+      <!-- Rating -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
           <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Min Rating</label>
-          <span class="text-cyan-400 font-mono text-sm font-bold">{{ Number(localFilters.minRating).toFixed(1) }}</span>
+          <span class="text-cyan-400 font-mono text-sm font-bold">{{ Number(filters.minRating).toFixed(1) }}</span>
         </div>
-        <input type="range" min="0" max="5" step="0.1" v-model="localFilters.minRating"
+        <input type="range" min="0" max="5" step="0.1" v-model="filters.minRating"
           class="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-cyan-500" />
       </div>
 
+      <!-- Timeline -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
           <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Timeline</label>
           <button @click="resetYearRange" class="text-[10px] text-zinc-600 hover:text-cyan-400 uppercase font-bold tracking-wider transition-colors">Reset</button>
         </div>
         <div class="flex gap-2">
-          <div class="relative flex-1">
-             <select v-model="localFilters.startYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
-                <option :value="null">START</option>
-                <option v-for="year in availableYears" :key="'s'+year" :value="year">{{ year }}</option>
-             </select>
-          </div>
+          <select v-model="filters.startYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
+            <option :value="null">START</option>
+            <option v-for="year in availableYears" :key="'s'+year" :value="year">{{ year }}</option>
+          </select>
           <div class="flex items-center text-zinc-700 text-xs">-</div>
-          <div class="relative flex-1">
-             <select v-model="localFilters.endYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
-                <option :value="null">END</option>
-                <option v-for="year in availableYears" :key="'e'+year" :value="year">{{ year }}</option>
-             </select>
-          </div>
+          <select v-model="filters.endYear" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 px-3 py-2.5 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors text-xs font-mono">
+            <option :value="null">END</option>
+            <option v-for="year in availableYears" :key="'e'+year" :value="year">{{ year }}</option>
+          </select>
         </div>
       </div>
 
+      <!-- Hardware -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
           <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Hardware</label>
-          <span class="text-[10px] font-mono text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded">{{ selectedPlatforms.length }} SEL</span>
+          <span class="text-[10px] font-mono text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded">{{ filters.platforms.length }} SEL</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 h-40 overflow-y-auto custom-scrollbar">
           <div class="space-y-0.5">
             <label v-for="platform in platforms" :key="platform.id" class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-900 cursor-pointer transition-colors">
               <div class="relative flex items-center">
-                <input type="checkbox" :value="platform.id" v-model="selectedPlatforms" @change="updatePlatforms"
+                <input type="checkbox" :value="platform.id" v-model="filters.platforms"
                   class="peer appearance-none w-4 h-4 border border-zinc-700 rounded bg-zinc-950 checked:bg-cyan-500 checked:border-cyan-500 transition-all cursor-pointer" />
                 <svg class="absolute w-3 h-3 text-zinc-950 opacity-0 peer-checked:opacity-100 left-0.5 top-0.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
@@ -79,10 +116,11 @@
         </div>
       </div>
 
+      <!-- Sorting -->
       <div class="space-y-2">
         <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Sort Protocol</label>
         <div class="relative">
-          <select v-model="localFilters.ordering" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors">
+          <select v-model="filters.ordering" class="w-full appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors">
             <option value="-rating">Highest Rating</option>
             <option value="rating">Lowest Rating</option>
             <option value="-released">Latest Release</option>
@@ -112,158 +150,6 @@
     </button>
   </div>
 </template>
-
-<script>
-/**
- * FilterSection Component
- *
- * Manages all available filters for game search:
- * - Genre
- * - Minimum rating
- * - Year range
- * - Platforms
- * - Sort criteria
- *
- * Emits a 'generate' event with selected filters when
- * the user clicks the generation button
- */
-export default {
-  name: 'FilterSection',
-
-  // Props received from parent component (App.vue)
-  props: {
-    // Array of available genres from API
-    genres: {
-      type: Array,
-      default: () => [],
-    },
-    // Array of available platforms from API
-    platforms: {
-      type: Array,
-      default: () => [],
-    },
-    // Flag to indicate if loading is in progress
-    isLoading: {
-      type: Boolean,
-      default: false,
-    },
-    // Object with current filters passed from parent
-    filters: {
-      type: Object,
-      default: () => ({
-        genre: '',                           // Selected genre ID
-        platform: '',                        // Selected platform ID
-        minRating: 0,                        // Minimum rating (0-5)
-        startYear: 2010,                     // Range start year
-        endYear: new Date().getFullYear(),   // Range end year
-        ordering: '-rating',                 // Sort criteria
-      }),
-    },
-  },
-
-  /**
-   * Component local data
-   */
-  data() {
-    const currentYear = new Date().getFullYear()
-    return {
-      // Local copy of filters to avoid direct prop mutations
-      localFilters: { ...this.filters },
-      // Array of selected platforms (checkbox)
-      selectedPlatforms: [],
-      // Array of available years from 1980 to current year in descending order
-      availableYears: Array.from({ length: currentYear - 1980 + 1 }, (_, i) => currentYear - i),
-    }
-  },
-
-  /**
-   * Computed properties
-   */
-  computed: {
-    /**
-     * Formats the year range for display in the interface
-     * @returns {string} Formatted range (e.g. "2010 - 2024" or "All")
-     */
-    displayYearRange() {
-      // If no year is selected, show "All"
-      if (!this.localFilters.startYear && !this.localFilters.endYear) {
-        return 'All'
-      }
-      // Otherwise show the range with default values if needed
-      return `${this.localFilters.startYear || 1980} - ${this.localFilters.endYear || 'today'}`
-    },
-  },
-
-  /**
-   * Watchers to react to prop changes
-   */
-  watch: {
-    // Synchronizes local filters when props change from parent
-    filters: {
-      handler(newFilters) {
-        this.localFilters = { ...newFilters }
-      },
-      deep: true,  // Deep watch to detect changes in nested properties
-    },
-  },
-
-  methods: {
-    /**
-     * Emits the 'generate' event with current filters
-     * Called when user clicks the "Generate" button
-     */
-    onGenerate() {
-      this.$emit('generate', this.localFilters)
-    },
-
-    /**
-     * Resets year range to default values (null = all years)
-     */
-    resetYearRange() {
-      this.localFilters.startYear = null
-      this.localFilters.endYear = null
-    },
-
-    /**
-     * Updates platform filter with selected checkboxes
-     * Called every time platform selection changes
-     */
-    updatePlatforms() {
-      // Updates platforms filter with array of selected platforms
-      this.localFilters.platforms = this.selectedPlatforms.length > 0 ? this.selectedPlatforms : []
-    },
-
-    /**
-     * Selects all available platforms
-     */
-    selectAllPlatforms() {
-      // Maps all platform IDs
-      this.selectedPlatforms = this.platforms.map((platform) => platform.id)
-      this.updatePlatforms()
-    },
-
-    /**
-     * Deselects all platforms
-     */
-    deselectAllPlatforms() {
-      this.selectedPlatforms = []
-      this.updatePlatforms()
-    },
-  },
-
-  /**
-   * Lifecycle hook - called when component is created
-   * Initializes selected platforms if already present in filters
-   */
-  created() {
-    // If there are already selected platforms in filters passed from parent,
-    // initialize selectedPlatforms array with these values
-    if (this.filters.platforms && this.filters.platforms.length > 0) {
-      this.selectedPlatforms = [...this.filters.platforms]
-    }
-  },
-}
-</script>
 
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

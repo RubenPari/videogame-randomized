@@ -1,10 +1,63 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { useVaultStore } from '@/stores/useVaultStore'
+
+const props = defineProps({
+  game: { type: Object, default: null },
+  description: { type: String, default: '' }
+})
+
+const vault = useVaultStore()
+
+// Local UI State
+const showNotification = ref(false)
+const notificationType = ref('success')
+const notificationMessage = ref('')
+
+// Computed
+const isSaved = computed(() => vault.isGameSaved(props.game?.id))
+
+// Methods
+const toggleSaveGame = async () => {
+  if (!props.game) return
+  
+  try {
+    const saved = await vault.toggleGame(props.game)
+    showToast(
+      saved ? 'Game saved to vault' : 'Game removed from vault',
+      'success'
+    )
+  } catch {
+    showToast('Vault error: transmission failed', 'error')
+  }
+}
+
+const showToast = (message, type = 'success') => {
+  notificationMessage.value = message
+  notificationType.value = type
+  showNotification.value = true
+  setTimeout(() => (showNotification.value = false), 3000)
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'UNKNOWN'
+  return new Date(dateString).toLocaleDateString('it-IT', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).toUpperCase()
+}
+</script>
+
 <template>
   <div v-if="game" class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative group flex flex-col">
+    <!-- Image Section -->
     <div class="relative h-72 md:h-96 w-full flex-shrink-0">
       <img :src="game.background_image || '/placeholder-game.jpg'" :alt="game.name"
         class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
       <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent"></div>
       
+      <!-- Rating Badge -->
       <div class="absolute top-4 right-4 flex gap-2">
         <div class="bg-zinc-950/90 backdrop-blur border border-zinc-800 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
           <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
@@ -14,6 +67,7 @@
         </div>
       </div>
 
+      <!-- Save Button -->
       <div class="absolute top-4 left-4">
         <button @click="toggleSaveGame" 
           class="p-2.5 rounded-lg backdrop-blur border transition-all"
@@ -27,6 +81,7 @@
         </button>
       </div>
       
+      <!-- Title & Release -->
       <div class="absolute bottom-0 left-0 w-full p-6 md:p-8">
         <div class="flex flex-wrap gap-2 mb-3">
           <span v-for="genre in game.genres?.slice(0,3)" :key="genre.id" 
@@ -44,7 +99,9 @@
       </div>
     </div>
 
+    <!-- Content Section -->
     <div class="p-6 md:p-8 space-y-8 flex-1 flex flex-col">
+      <!-- Hardware -->
       <div>
         <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Compatible Hardware</h3>
         <div class="flex flex-wrap gap-2">
@@ -56,6 +113,7 @@
         </div>
       </div>
 
+      <!-- Description -->
       <div class="flex-1">
         <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Database Entry</h3>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5 text-zinc-400 text-sm leading-relaxed max-h-60 overflow-y-auto custom-scrollbar">
@@ -64,6 +122,7 @@
       </div>
     </div>
 
+    <!-- Toast -->
     <Transition name="toast">
       <div v-if="showNotification" class="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg font-mono text-xs uppercase tracking-wider font-bold shadow-2xl z-10"
         :class="notificationType === 'success' ? 'bg-cyan-500 text-zinc-950' : 'bg-red-500 text-white'">
@@ -72,157 +131,6 @@
     </Transition>
   </div>
 </template>
-
-<script>
-import databaseService from '@/services/database'
-
-/**
- * GameCard Component with Save/Remove functionality
- *
- * Displays detailed information for a single game and allows users to:
- * - Save games to their personal collection
- * - Remove games from their collection
- * - View save status with visual indicators
- * - Get notifications for save/remove actions
- */
-export default {
-  name: 'GameCard',
-
-  // Props received from parent component
-  props: {
-    // Object with all game information
-    game: {
-      type: Object,
-      default: null,
-    },
-    // Translated game description
-    description: {
-      type: String,
-      default: '',
-    },
-  },
-
-  data() {
-    return {
-      // Track whether the current game is saved
-      isSaved: false,
-      // Control notification display
-      showNotification: false,
-      notificationType: 'success', // 'success' or 'error'
-      notificationMessage: '',
-    }
-  },
-
-  watch: {
-    // Watch for game changes to update save status
-    game: {
-      handler(newGame) {
-        if (newGame) {
-          this.checkSaveStatus()
-        }
-      },
-      immediate: true
-    }
-  },
-
-  methods: {
-    /**
-     * Checks if the current game is saved in the database
-     */
-    async checkSaveStatus() {
-      if (this.game) {
-        this.isSaved = await databaseService.isGameSaved(this.game.id)
-      }
-    },
-
-    /**
-     * Toggles the save status of the current game
-     */
-    async toggleSaveGame() {
-      if (!this.game) return
-
-      try {
-        if (this.isSaved) {
-          // Remove the game from saved collection
-          const success = await databaseService.removeGame(this.game.id)
-
-          if (success) {
-            this.isSaved = false
-            this.showNotificationMessage('Game removed from your collection', 'success')
-            // Emit event to parent component
-            this.$emit('game-removed', this.game.id)
-          } else {
-            this.showNotificationMessage('Error removing game', 'error')
-          }
-        } else {
-          // Save the game to collection
-          const success = await databaseService.saveGame(this.game)
-
-          if (success) {
-            this.isSaved = true
-            this.showNotificationMessage('Game saved to your collection', 'success')
-            // Emit event to parent component
-            this.$emit('game-saved', this.game)
-          } else {
-            this.showNotificationMessage('Error saving game', 'error')
-          }
-        }
-      } catch (error) {
-        console.error('Error toggling save status:', error)
-        this.showNotificationMessage('An unexpected error occurred', 'error')
-      }
-    },
-
-    /**
-     * Shows a notification message
-     * @param {string} message - The message to display
-     * @param {string} type - The type of notification ('success' or 'error')
-     */
-    showNotificationMessage(message, type = 'success') {
-      this.notificationMessage = message
-      this.notificationType = type
-      this.showNotification = true
-
-      // Hide notification after 3 seconds
-      setTimeout(() => {
-        this.showNotification = false
-      }, 3000)
-    },
-
-    /**
-     * Formats an ISO date into a readable Italian format
-     * @param {string} dateString - Date in ISO format (YYYY-MM-DD)
-     * @returns {string} Date formatted in Italian (e.g. "15 gen 2023")
-     */
-    formatDate(dateString) {
-      // Handle missing date case
-      if (!dateString) return 'Unknown date'
-
-      // Convert string to Date object and format in Italian
-      const date = new Date(dateString)
-      return date.toLocaleDateString('it-IT', {
-        year: 'numeric',    // Full year (2023)
-        month: 'short',     // Abbreviated month (gen, feb, etc.)
-        day: 'numeric',     // Numeric day (1, 2, etc.)
-      })
-    },
-
-    /**
-     * Determines the CSS class for the rating badge color
-     * @param {number} rating - Game rating (0-5)
-     * @returns {string} Tailwind CSS class for background color with glassmorphism
-     */
-    getRatingClass(rating) {
-      // Green gradient for excellent rating (4+)
-      if (rating >= 4) return 'bg-gradient-to-r from-green-500/80 to-emerald-500/80 text-white'
-      // Yellow gradient for good rating (2.5-3.9)
-      if (rating >= 2.5) return 'bg-gradient-to-r from-yellow-500/80 to-orange-500/80 text-white'
-      // Red gradient for low rating (<2.5)
-      return 'bg-gradient-to-r from-red-500/80 to-pink-500/80 text-white'
-    },
-  },
-}
-</script>
 
 <style scoped>
 .toast-enter-active, .toast-leave-active { transition: all 0.3s ease; }
